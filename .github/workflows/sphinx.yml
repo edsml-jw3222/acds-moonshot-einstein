@@ -1,0 +1,51 @@
+name: build-docs
+
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+
+jobs:
+  build-docs:
+    name: build-docs
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python on ubuntu-latest
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -e .
+        pip install sphinx
+
+    - name: Build using sphinx
+      run: |
+        sphinx-build -b latex docs docs/tex
+
+    - name: Install texlive
+      run: |
+        sudo apt install texlive-latex-recommended texlive-fonts-recommended tex-gyre texlive-latex-extra latexmk
+    - name: Compile into pdf
+      run: |
+        cd docs/tex
+        make
+        cd -
+        mv docs/tex/*.pdf docs
+    - name: Push pdf
+      run: |
+        git config user.name "$(git log -n 1 --pretty=format:%an)"
+        git config user.email "$(git log -n 1 --pretty=format:%ae)"
+        git add docs/*.pdf
+        git commit -a -m "Added documentation from Github Actions"
+        git push

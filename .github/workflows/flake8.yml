@@ -1,0 +1,23 @@
+name: flake8
+on: [push, pull_request]
+
+jobs:
+  flake8:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
+
+    - name: Install flake8
+      run: |
+        pip install --upgrade pip
+        pip install flake8
+
+    - name: flake8
+      run: |
+        flake8 .

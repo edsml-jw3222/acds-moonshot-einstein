@@ -1,0 +1,34 @@
+name: anaconda
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-env:
+    
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -l {0}
+    steps:
+      - name: Copying repository
+        uses: actions/checkout@v2
+      
+      - name: setting up mc and anv
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: einstein
+          environment-file: environment.yml
+          python-version: 3.9
+          auto-activate-base: false
+      - run: |
+          conda info
+          conda list
+      
+      - name: Test with pytest
+        run: |
+          pip install -e .
+          cd tests
+          pytest .
